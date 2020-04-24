@@ -1,3 +1,8 @@
+local function mod(n,d)
+    return n - d*math.floor(n/d)
+end
+
+-- The Luhn algorithm.
 local function luhn(str)
     local sum = 0
 
@@ -18,6 +23,7 @@ local function luhn(str)
     return (math.ceil(sum/10) * 10) - sum
 end
 
+-- Test if the input parameters are a valid date or not.
 local function testDate(year, month, day)
     local y = tonumber(year)
     local m = tonumber(month)
@@ -30,6 +36,7 @@ end
 local Personnummer = {}
 
 do
+    -- Personnummer constructor.
     function Personnummer:new(pin)
         self.__index = self
 
@@ -43,6 +50,8 @@ do
         return p
     end
 
+    -- Format a Swedish personal identity as one of the official formats,
+    -- a long format or a short format.
     function Personnummer:format(long)
         if long then
             return self.century .. self.year .. self.month .. self.day .. self.num .. self.check
@@ -51,15 +60,50 @@ do
         return self.year .. self.month .. self.day .. self.sep .. self.num .. self.check
     end
 
+    -- Get age from a Swedish personal identity.
+    function Personnummer:get_age()
+        local age_day = self.day
+
+        if self:is_coordination_number() then
+            age_day = tostring(tonumber(age_day - 60))
+        end
+
+        local t = os.time{year=self.fullYear,month=self.month,day=age_day}
+        local d = os.date("*t", t)
+        local n = os.date("*t", os.time())
+
+        local years = n.year - d.year
+        local days = os.difftime(os.time(), t) / (3600 * 24 * 1000)
+        local totalDays = 365
+
+        if math.abs(t) > os.time() then
+            years = years - 1
+        end
+
+        -- leap year
+        if (mod(years, 4) == 0 and (mod(years, 100) ~= 0 or mod(years, 400) == 0)) then
+            totalDays = 366
+        end
+
+        return math.floor(years + days / totalDays)
+    end
+
+    function Personnummer:is_coordination_number()
+        return testDate(self.fullYear,self.month, tostring(tonumber(self.day)-60))
+    end
+
+    -- Check if a Swedish personal identity number is for a female.
     function Personnummer:is_female()
         return self:is_male() == false
     end
 
+    -- Check if a Swedish personal identity number is for a male.
     function Personnummer:is_male()
         local sexDigit = tonumber(string.sub(self.num, 3, 3))
         return sexDigit % 2 == 1
     end
 
+    -- Parse Swedish personal identity number.
     function Personnummer:parse(pin)
         local plus = string.match(pin, "+")
 
@@ -99,6 +143,7 @@ do
         self.fullYear = self.century .. self.year
     end
 
+    -- Check if Swedish personal identity number is valid or not.
     function Personnummer:valid()
         local valid = luhn(self.year .. self.month .. self.day .. self.num) == tonumber(self.check)
 
@@ -111,12 +156,15 @@ do
 end
 
 return {
+    -- Personnummer constructor.
     new = function(pin)
         return Personnummer:new(pin)
     end,
+    -- Parse Swedish personal identity number.
     parse = function(pin)
         return Personnummer:new(pin)
     end,
+    -- Check if Swedish personal identity number is valid or not.
     valid = function(pin)
         local status = pcall(function(pin)
             return Personnummer:new(pin)

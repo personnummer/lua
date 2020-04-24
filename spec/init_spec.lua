@@ -16,6 +16,39 @@ local lunajson = require("dkjson")
 local testList = lunajson.decode(fileContent)
 local availableListFormats = {"integer","long_format","short_format","separated_format","separated_long"}
 
+local function mod(n,d)
+    return n - d*math.floor(n/d)
+end
+
+local get_expected_age = function(item)
+    local year = string.sub(item.separated_long, 1,4)
+    local month = string.sub(item.separated_long, 5, 6)
+    local day = string.sub(item.separated_long, 7, 8)
+
+    if type == "con" then
+        day = tostring(tonumber(day - 60))
+    end
+
+    local t = os.time{year=year,month=month,day=day}
+    local d = os.date("*t", t)
+    local n = os.date("*t", os.time())
+
+    local years = n.year - d.year
+    local days = os.difftime(os.time(), t) / (3600 * 24 * 1000)
+    local totalDays = 365
+
+    if math.abs(t) > os.time() then
+        years = years - 1
+    end
+
+    -- leap year
+    if (mod(years, 4) == 0 and (mod(years, 100) ~= 0 or mod(years, 400) == 0)) then
+        totalDays = 366
+    end
+
+    return math.floor(years + days / totalDays)
+end
+
 describe("Personnummer tests", function ()
     it("Should validate personnummer", function ()
         for _, item in pairs(testList) do
@@ -62,24 +95,14 @@ describe("Personnummer tests", function ()
     it("Should test personnummer age", function ()
         for _, item in pairs(testList) do
             if item.valid then
+                local expected_age = get_expected_age(item)
                 for _, format in pairs(availableListFormats) do
-                    local year = string.sub(item.separated_long, 1,4)
-                    local month = string.sub(item.separated_long, 5, 6)
-                    local day = string.sub(item.separated_long, 7, 8)
-
-                    if item.type == "con" then
-                        day = tostring(tonumber(day) - 60)
+                    if not format == "short_format" and not string.match(item[format], "+") then
+                        local p = Personnummer.parse(item[format])
+                        assert.are.same(expected_age, p.get_age())
                     end
-                    local t = os.time{year=year,month=month,day=day}
-                    local d = os.date("*t", t)
-                    local dd = os.date("*t", os.time())
-                    print(dd.year - d.year,item.separated_long)
                 end
             end
         end
-
     end)
 end)
-
--- if (format != "short_format" && item.separated_format.contains("+") == false)
--- item.long_format shouldEqual Personnummer.parse(item.get(format)).format(true)
