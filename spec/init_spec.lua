@@ -5,7 +5,7 @@ local Personnummer = require('personnummer')
 local name = "spec/list.json"
 local function readall(filename)
     local fh = assert(io.open(filename, "rb"))
-    local contents = assert(fh:read("a")) -- "a" in Lua 5.3; "*a" in Lua 5.1 and 5.2
+    local contents = assert(fh:read("*all"))
     fh:close()
     return contents
 end
