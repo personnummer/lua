@@ -29,5 +29,5 @@ jobs:
 
     - name: lint and test
       run: |
-        luacheck init.lua
+        luacheck src/init.lua
         busted spec
