@@ -168,9 +168,9 @@ return {
     end,
     -- Check if Swedish personal identity number is valid or not.
     valid = function(pin)
-        local status = pcall(function(pin)
-            return Personnummer:new(pin)
-        end,pin)
+        local status = pcall(function(p)
+            return Personnummer:new(p)
+        end, pin)
         return status
     end
 }

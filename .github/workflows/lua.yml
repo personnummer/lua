@@ -22,7 +22,12 @@ jobs:
     - name: save test file
       run: curl -O spec/list.json https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json
 
-    - name: install and test
+    - name: install dependencies
       run: |
+        luarocks install luacheck
         luarocks install busted
-        luarocks
+
+    - name: lint and test
+      run: |
+        luacheck src
+        busted spec
