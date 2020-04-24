@@ -126,6 +126,8 @@ do
             self.day = string.sub(pin, 5, 6)
             self.num = string.sub(pin, 7, 9)
             self.check = string.sub(pin, 10, 10)
+        else
+            error("Invalid swedish personal identity number")
         end
 
         if self.century == "" then
