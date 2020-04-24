@@ -20,7 +20,7 @@ jobs:
     - uses: leafo/gh-actions-luarocks@master
 
     - name: save test file
-    - run: curl -O spec/list.json https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json
+      run: curl -O spec/list.json https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json
 
     - name: install and test
       run: |
