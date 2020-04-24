@@ -1,6 +1,6 @@
 require "busted"
 
-local Personnummer = require('src')
+local Personnummer = require('personnummer')
 
 local name = "spec/list.json"
 local function readall(filename)

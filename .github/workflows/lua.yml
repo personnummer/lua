@@ -27,6 +27,9 @@ jobs:
         luarocks install luacheck
         luarocks install busted
 
+    - name: build
+      run: luarocks make
+
     - name: lint and test
       run: |
         luacheck src/init.lua
