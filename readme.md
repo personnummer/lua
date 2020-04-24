@@ -13,7 +13,7 @@ luarocks install personnummer
 ## Example
 
 ```lua
-local Personnummer = require('personnummer');
+local Personnummer = require('personnummer')
 
 Personnummer.valid('198507099805')
 --=> true
