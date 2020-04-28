@@ -1,0 +1,36 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        luaVersion: ["5.1.5", "5.2.4", "5.3.5", "luajit-2.0.5", "luajit-2.1.0-beta3", "luajit-openresty", "5.1"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+    - uses: leafo/gh-actions-lua@master
+      with:
+        luaVersion: ${{ matrix.luaVersion }}
+
+    - uses: leafo/gh-actions-luarocks@master
+
+    - name: Save test file
+      run: curl -o spec/list.json https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json
+
+    - name: Install dependencies
+      run: |
+        luarocks install luacheck
+        luarocks install busted
+
+    - name: build
+      run: luarocks make
+
+    - name: Lint and test
+      run: |
+        luacheck src/init.lua
+        busted spec
