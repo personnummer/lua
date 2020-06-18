@@ -130,6 +130,10 @@ do
             error("Invalid swedish personal identity number")
         end
 
+        if self.num == "000" then
+            error("Invalid swedish personal identity number")
+        end
+
         if self.century == "" then
             local baseYear = tonumber(os.date("%Y"))
             local year = tonumber(self.year)
