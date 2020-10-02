@@ -1,7 +1,7 @@
 FROM alpine:latest
 WORKDIR /app
 
-ENV LUA_VERSION 5.2
+ENV LUA_VERSION 5.3
 ENV LUA_PACKAGE lua${LUA_VERSION}
 
 RUN apk --no-cache add ${LUA_PACKAGE} ${LUA_PACKAGE}-dev build-base git bash unzip curl outils-md5 \

@@ -20,8 +20,8 @@ Personnummer.valid("198507099805")
 ## Testing locally with Docker
 
 ```
-docker build -t luap
-docker run --rm -it -v $(pwd):/app luap /bin/ash -c "luarocks make && busted spec
+docker build -t luap .
+docker run --rm -it -v $(pwd):/app luap /bin/ash -c "luarocks make && busted spec"
 ```
 
 ## License
