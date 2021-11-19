@@ -59,11 +59,13 @@ describe("Personnummer tests", function ()
     end)
     it("Should test personnummer formatting", function ()
         for _, item in pairs(testList) do
-            for _, format in pairs(availableListFormats) do
-                if not format == "short_format" and not string.match(item[format], "+") then
-                    local p = Personnummer.parse(item[format])
-                    assert.are.same(item.separated_format, p:format())
-                    assert.are.same(item.long_format, p:format(true))
+            if item.valid then
+                for _, format in pairs(availableListFormats) do
+                    if not format == "short_format" then
+                        local p = Personnummer.parse(item[format])
+                        assert.are.same(item.separated_format, p:format())
+                        assert.are.same(item.long_format, p:format(true))
+                    end
                 end
             end
         end
@@ -97,7 +99,7 @@ describe("Personnummer tests", function ()
             if item.valid then
                 local expected_age = get_expected_age(item)
                 for _, format in pairs(availableListFormats) do
-                    if not format == "short_format" and not string.match(item[format], "+") then
+                    if not format == "short_format" then
                         local p = Personnummer.parse(item[format])
                         assert.are.same(expected_age, p.get_age())
                     end
