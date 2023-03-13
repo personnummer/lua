@@ -1,0 +1,4 @@
+name: "Lua"
+maintainer: "@frozzare"
+spec: 3
+workflow: "lua.yml"
