@@ -25,16 +25,11 @@ jobs:
 
     - uses: leafo/gh-actions-luarocks@master
 
-    - name: Save test file
-      run: curl -o spec/list.json https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json
-
-    - name: Save interim test file
-      run: curl -o spec/interim.json https://raw.githubusercontent.com/personnummer/meta/master/testdata/interim.json
-
     - name: Install dependencies
       run: |
         luarocks install luacheck
         luarocks install busted
+        luarocks install http.request
 
     - name: build
       run: luarocks make

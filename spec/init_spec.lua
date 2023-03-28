@@ -1,19 +1,25 @@
 require "busted"
 
 local Personnummer = require('personnummer')
+local lunajson = require("dkjson")
+local request = require("http.request")
 
-local name = "spec/list.json"
-local function readall(filename)
-    local fh = assert(io.open(filename, "rb"))
-    local contents = assert(fh:read("*all"))
-    fh:close()
-    return contents
+local function get_json(url)
+    local req = request.new_from_uri(url)
+    local _, stream = req:go()
+
+    local body, err = stream:get_body_as_string()
+    if not body and err then
+        io.stderr:write(tostring(err), "\n")
+        os.exit(1)
+    end
+
+    return lunajson.decode(body)
 end
 
-local fileContent = readall(name)
+local testList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json")
+-- local interimList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/interim.json")
 
-local lunajson = require("dkjson")
-local testList = lunajson.decode(fileContent)
 local availableListFormats = { "integer", "long_format", "short_format", "separated_format", "separated_long" }
 
 local function mod(n, d)
