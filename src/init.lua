@@ -1,5 +1,5 @@
-local function mod(n,d)
-    return n - d*math.floor(n/d)
+local function mod(n, d)
+    return n - d * math.floor(n / d)
 end
 
 -- The Luhn algorithm.
@@ -7,7 +7,7 @@ local function luhn(str)
     local sum = 0
 
     for i = 1, #str do
-        local v = string.byte(str:sub(i,i)) - string.byte("0")
+        local v = string.byte(str:sub(i, i)) - string.byte("0")
 
         if i % 2 == 1 then
             v = v * 2
@@ -20,7 +20,7 @@ local function luhn(str)
         sum = sum + v
     end
 
-    return (math.ceil(sum/10) * 10) - sum
+    return (math.ceil(sum / 10) * 10) - sum
 end
 
 -- Test if the input parameters are a valid date or not.
@@ -28,7 +28,7 @@ local function testDate(year, month, day)
     local y = tonumber(year)
     local m = tonumber(month)
     local dd = tonumber(day)
-    local t = os.time{year=y,month=m,day=dd}
+    local t = os.time { year = year, month = month, day = day }
     local d = os.date("*t", t)
     return d.year == y and d.month == m and d.day == dd
 end
@@ -60,16 +60,23 @@ do
         return self.year .. self.month .. self.day .. self.sep .. self.num .. self.check
     end
 
-    -- Get age from a Swedish personal identity.
-    function Personnummer:get_age()
+    -- Get date from a Swedish personal identity.
+    function Personnummer:get_date()
         local age_day = self.day
 
         if self:is_coordination_number() then
             age_day = tostring(tonumber(age_day - 60))
         end
 
-        local t = os.time{year=self.full_year,month=self.month,day=age_day}
-        local d = os.date("*t", t)
+        local t = os.time { year = self.full_year, month = self.month, day = age_day }
+
+        return os.date("*t", t)
+    end
+
+    -- Get age from a Swedish personal identity.
+    function Personnummer:get_age()
+        local d = self.get_date(self)
+        local t = os.time { year = self.full_year, month = self.month, day = d.day }
         local n = os.date("*t", os.time())
 
         local years = n.year - d.year
@@ -89,7 +96,7 @@ do
     end
 
     function Personnummer:is_coordination_number()
-        return testDate(self.full_year,self.month, tostring(tonumber(self.day)-60))
+        return testDate(self.full_year, self.month, tostring(tonumber(self.day) - 60))
     end
 
     -- Check if a Swedish personal identity number is for a female.
@@ -109,12 +116,12 @@ do
 
         self.sep = "-"
 
-        pin = string.gsub(pin,"+", "")
+        pin = string.gsub(pin, "+", "")
         pin = string.gsub(pin, "-", "")
 
         if string.len(pin) == 12 then
             self.century = string.sub(pin, 1, 2)
-            self.year = string.sub(pin, 3,4)
+            self.year = string.sub(pin, 3, 4)
             self.month = string.sub(pin, 5, 6)
             self.day = string.sub(pin, 7, 8)
             self.num = string.sub(pin, 9, 11)
@@ -153,11 +160,11 @@ do
     function Personnummer:valid()
         local valid = luhn(self.year .. self.month .. self.day .. self.num) == tonumber(self.check)
 
-        if valid and testDate(self.full_year,self.month,self.day) then
+        if valid and testDate(self.full_year, self.month, self.day) then
             return true
         end
 
-        return valid and testDate(self.full_year,self.month, tostring(tonumber(self.day)-60))
+        return valid and testDate(self.full_year, self.month, tostring(tonumber(self.day) - 60))
     end
 end
 
