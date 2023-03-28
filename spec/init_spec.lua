@@ -72,7 +72,6 @@ describe("Personnummer tests", function()
     it("Should validate personnummer", function()
         for _, item in pairs(testList) do
             for _, format in pairs(availableListFormats) do
-                print(item[format], item.valid, Personnummer.valid(item[format]))
                 assert.are.same(item.valid, Personnummer.valid(item[format]))
             end
         end
