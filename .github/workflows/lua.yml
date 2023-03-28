@@ -29,7 +29,7 @@ jobs:
       run: |
         luarocks install luacheck
         luarocks install busted
-        luarocks install http.request
+        luarocks install http
 
     - name: build
       run: luarocks make
