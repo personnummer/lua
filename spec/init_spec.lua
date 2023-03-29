@@ -120,7 +120,7 @@ describe("Personnummer tests", function()
                 for _, format in pairs(availableListFormats) do
                     if format ~= "short_format" then
                         local p = Personnummer.parse(item[format])
-                        assert.are.same(expected_date, p.get_date())
+                        assert.are.same(expected_date, p:get_date())
                     end
                 end
             end
@@ -133,7 +133,7 @@ describe("Personnummer tests", function()
                 for _, format in pairs(availableListFormats) do
                     if format ~= "short_format" then
                         local p = Personnummer.parse(item[format])
-                        assert.are.same(expected_age, p.get_age())
+                        assert.are.same(expected_age, p:get_age())
                     end
                 end
             end
