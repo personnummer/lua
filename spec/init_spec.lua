@@ -18,7 +18,7 @@ local function get_json(url)
 end
 
 local testList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json")
--- local interimList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/interim.json")
+local interimList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/interim.json")
 
 local availableListFormats = { "integer", "long_format", "short_format", "separated_format", "separated_long" }
 
@@ -118,7 +118,7 @@ describe("Personnummer tests", function()
             if item.valid then
                 local expected_date = get_expected_date(item)
                 for _, format in pairs(availableListFormats) do
-                    if not format == "short_format" then
+                    if format ~= "short_format" then
                         local p = Personnummer.parse(item[format])
                         assert.are.same(expected_date, p.get_date())
                     end
@@ -131,9 +131,25 @@ describe("Personnummer tests", function()
             if item.valid then
                 local expected_age = get_expected_age(item)
                 for _, format in pairs(availableListFormats) do
-                    if not format == "short_format" then
+                    if format ~= "short_format" then
                         local p = Personnummer.parse(item[format])
                         assert.are.same(expected_age, p.get_age())
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+describe('Interim number tests', function()
+    it("Should test interim numbers", function()
+        for _, item in pairs(interimList) do
+            if item.valid then
+                for _, format in pairs(availableListFormats) do
+                    if format ~= "integer" then
+                        local p = Personnummer.parse(item[format])
+                        assert.are.same(item.separated_format, p:format())
+                        assert.are.same(item.long_format, p:format(true))
                     end
                 end
             end

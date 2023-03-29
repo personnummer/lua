@@ -95,8 +95,15 @@ do
         return math.floor(years + days / totalDays)
     end
 
+    -- Check if Swedish personal identity number is a coordination number or not.
     function Personnummer:is_coordination_number()
         return testDate(self.full_year, self.month, tostring(tonumber(self.day) - 60))
+    end
+
+    -- Check if Swedish personal identity number is a interim number or not.
+    function Personnummer:is_interim_number()
+        -- TRSUWXJKLMN
+        return string.find("TRSUWXJKLMN", self.num:sub(0, 1)) ~= nil
     end
 
     -- Check if a Swedish personal identity number is for a female.
@@ -158,7 +165,12 @@ do
 
     -- Check if Swedish personal identity number is valid or not.
     function Personnummer:valid()
-        local valid = luhn(self.year .. self.month .. self.day .. self.num) == tonumber(self.check)
+        local num = self.num
+        if self.is_interim_number(self) then
+            num = '1' .. self.num:sub(2)
+        end
+
+        local valid = luhn(self.year .. self.month .. self.day .. num) == tonumber(self.check)
 
         if valid and testDate(self.full_year, self.month, self.day) then
             return true
