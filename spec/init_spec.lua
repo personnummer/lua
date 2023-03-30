@@ -142,7 +142,7 @@ describe("Personnummer tests", function()
 end)
 
 describe('Interim number tests', function()
-    it("Should test interim numbers", function()
+    it("Should test valid interim numbers", function()
         for _, item in pairs(interimList) do
             if item.valid then
                 for _, format in pairs(availableListFormats) do
@@ -152,6 +152,21 @@ describe('Interim number tests', function()
                         })
                         assert.are.same(item.separated_format, p:format())
                         assert.are.same(item.long_format, p:format(true))
+                    end
+                end
+            end
+        end
+    end)
+    it("Should test invalid interim numbers", function()
+        for _, item in pairs(interimList) do
+            if not item.valid then
+                for _, format in pairs(availableListFormats) do
+                    if format ~= "integer" then
+                        local status, res = pcall(function(pin)
+                            return Personnummer.parse(item[format])
+                        end)
+                        assert.falsy(status)
+                        assert.are.same("string", type(res))
                     end
                 end
             end
