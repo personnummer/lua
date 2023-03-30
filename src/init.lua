@@ -1,3 +1,17 @@
+local function merge(a, b)
+    if type(a) == 'table' and type(b) == 'table' then
+        for k, v in pairs(b) do
+            if type(v) == 'table' and type(a[k] or false) == 'table' then
+                merge(a[k], v)
+            else
+                a[k] =
+                    v
+            end
+        end
+    end
+    return a
+end
+
 local function mod(n, d)
     return n - d * math.floor(n / d)
 end
@@ -34,16 +48,25 @@ local function testDate(year, month, day)
 end
 
 local Personnummer = {}
+local Options = {
+    allow_coordination_number = true,
+    allow_interim_number = false
+}
 
 do
     -- Personnummer constructor.
-    function Personnummer:new(pin)
+    function Personnummer:new(pin, options)
         self.__index = self
+        local o = merge(Options, options)
 
         local p = setmetatable({}, self)
         p:parse(pin)
 
-        if not p:valid() then
+        if self:is_coordination_number() and not o.allow_coordination_number then
+            error("Invalid swedish personal identity number")
+        elseif self:is_interim_number() and not o.allow_interim_number then
+            error("Invalid swedish personal identity number")
+        elseif not p:valid() then
             error("Invalid swedish personal identity number")
         end
 
@@ -182,18 +205,19 @@ end
 
 return {
     -- Personnummer constructor.
-    new = function(pin)
-        return Personnummer:new(pin)
+    new = function(pin, options)
+        return Personnummer:new(pin, options)
     end,
     -- Parse Swedish personal identity number.
-    parse = function(pin)
-        return Personnummer:new(pin)
+    parse = function(pin, options)
+        return Personnummer:new(pin, options)
     end,
     -- Check if Swedish personal identity number is valid or not.
-    valid = function(pin)
-        local status = pcall(function(p)
-            return Personnummer:new(p)
-        end, pin)
+    valid = function(pin, options)
+        local status = pcall(function(p, o)
+            print(Personnummer:new(p, o))
+            return Personnummer:new(p, o)
+        end, pin, options)
         return status
     end
 }
