@@ -147,7 +147,9 @@ describe('Interim number tests', function()
             if item.valid then
                 for _, format in pairs(availableListFormats) do
                     if format ~= "integer" then
-                        local p = Personnummer.parse(item[format])
+                        local p = Personnummer.parse(item[format], {
+                            allow_interim_number = true
+                        })
                         assert.are.same(item.separated_format, p:format())
                         assert.are.same(item.long_format, p:format(true))
                     end

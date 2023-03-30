@@ -62,9 +62,9 @@ do
         local p = setmetatable({}, self)
         p:parse(pin)
 
-        if self:is_coordination_number() and not o.allow_coordination_number then
+        if p:is_coordination_number() and o.allow_coordination_number == false then
             error("Invalid swedish personal identity number")
-        elseif self:is_interim_number() and not o.allow_interim_number then
+        elseif p:is_interim_number() and o.allow_interim_number == false then
             error("Invalid swedish personal identity number")
         elseif not p:valid() then
             error("Invalid swedish personal identity number")
@@ -215,7 +215,6 @@ return {
     -- Check if Swedish personal identity number is valid or not.
     valid = function(pin, options)
         local status = pcall(function(p, o)
-            print(Personnummer:new(p, o))
             return Personnummer:new(p, o)
         end, pin, options)
         return status
