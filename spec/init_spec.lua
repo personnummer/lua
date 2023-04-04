@@ -1,35 +1,54 @@
 require "busted"
 
 local Personnummer = require('personnummer')
-
-local name = "spec/list.json"
-local function readall(filename)
-    local fh = assert(io.open(filename, "rb"))
-    local contents = assert(fh:read("*all"))
-    fh:close()
-    return contents
-end
-
-local fileContent = readall(name)
-
 local lunajson = require("dkjson")
-local testList = lunajson.decode(fileContent)
-local availableListFormats = {"integer","long_format","short_format","separated_format","separated_long"}
+local request = require("http.request")
 
-local function mod(n,d)
-    return n - d*math.floor(n/d)
+local function get_json(url)
+    local req = request.new_from_uri(url)
+    local _, stream = req:go()
+
+    local body, err = stream:get_body_as_string()
+    if not body and err then
+        io.stderr:write(tostring(err), "\n")
+        os.exit(1)
+    end
+
+    return lunajson.decode(body)
 end
 
-local get_expected_age = function(item)
-    local year = string.sub(item.separated_long, 1,4)
+local testList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json")
+local interimList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/interim.json")
+
+local availableListFormats = { "integer", "long_format", "short_format", "separated_format", "separated_long" }
+
+local function mod(n, d)
+    return n - d * math.floor(n / d)
+end
+
+local get_expected_date = function(item)
+    local year = string.sub(item.separated_long, 1, 4)
     local month = string.sub(item.separated_long, 5, 6)
     local day = string.sub(item.separated_long, 7, 8)
 
-    if type == "con" then
+    if item.type == "con" then
         day = tostring(tonumber(day - 60))
     end
 
-    local t = os.time{year=year,month=month,day=day}
+    local t = os.time { year = year, month = month, day = day }
+    return os.date("*t", t)
+end
+
+local get_expected_age = function(item)
+    local year = string.sub(item.separated_long, 1, 4)
+    local month = string.sub(item.separated_long, 5, 6)
+    local day = string.sub(item.separated_long, 7, 8)
+
+    if item.type == "con" then
+        day = tostring(tonumber(day - 60))
+    end
+
+    local t = os.time { year = year, month = month, day = day }
     local d = os.date("*t", t)
     local n = os.date("*t", os.time())
 
@@ -49,15 +68,15 @@ local get_expected_age = function(item)
     return math.floor(years + days / totalDays)
 end
 
-describe("Personnummer tests", function ()
-    it("Should validate personnummer", function ()
+describe("Personnummer tests", function()
+    it("Should validate personnummer", function()
         for _, item in pairs(testList) do
             for _, format in pairs(availableListFormats) do
                 assert.are.same(item.valid, Personnummer.valid(item[format]))
             end
         end
     end)
-    it("Should test personnummer formatting", function ()
+    it("Should test personnummer formatting", function()
         for _, item in pairs(testList) do
             if item.valid then
                 for _, format in pairs(availableListFormats) do
@@ -70,7 +89,7 @@ describe("Personnummer tests", function ()
             end
         end
     end)
-    it("Should catch personnummer errors", function ()
+    it("Should catch personnummer errors", function()
         for _, item in pairs(testList) do
             if not item.valid then
                 for _, format in pairs(availableListFormats) do
@@ -83,7 +102,7 @@ describe("Personnummer tests", function ()
             end
         end
     end)
-    it("Should test personnummer sex", function ()
+    it("Should test personnummer sex", function()
         for _, item in pairs(testList) do
             if item.valid then
                 for _, format in pairs(availableListFormats) do
@@ -94,14 +113,60 @@ describe("Personnummer tests", function ()
             end
         end
     end)
-    it("Should test personnummer age", function ()
+    it("Should test personnummer date", function()
+        for _, item in pairs(testList) do
+            if item.valid then
+                local expected_date = get_expected_date(item)
+                for _, format in pairs(availableListFormats) do
+                    if format ~= "short_format" then
+                        local p = Personnummer.parse(item[format])
+                        assert.are.same(expected_date, p:get_date())
+                    end
+                end
+            end
+        end
+    end)
+    it("Should test personnummer age", function()
         for _, item in pairs(testList) do
             if item.valid then
                 local expected_age = get_expected_age(item)
                 for _, format in pairs(availableListFormats) do
-                    if not format == "short_format" then
+                    if format ~= "short_format" then
                         local p = Personnummer.parse(item[format])
-                        assert.are.same(expected_age, p.get_age())
+                        assert.are.same(expected_age, p:get_age())
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+describe('Interim number tests', function()
+    it("Should test valid interim numbers", function()
+        for _, item in pairs(interimList) do
+            if item.valid then
+                for _, format in pairs(availableListFormats) do
+                    if format ~= "integer" then
+                        local p = Personnummer.parse(item[format], {
+                            allow_interim_number = true
+                        })
+                        assert.are.same(item.separated_format, p:format())
+                        assert.are.same(item.long_format, p:format(true))
+                    end
+                end
+            end
+        end
+    end)
+    it("Should test invalid interim numbers", function()
+        for _, item in pairs(interimList) do
+            if not item.valid then
+                for _, format in pairs(availableListFormats) do
+                    if format ~= "integer" then
+                        local status, res = pcall(function(pin)
+                            return Personnummer.parse(item[format])
+                        end)
+                        assert.falsy(status)
+                        assert.are.same("string", type(res))
                     end
                 end
             end
