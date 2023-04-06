@@ -1,9 +1,9 @@
 package = "Personnummer"
-version = "3.0.2-1"
+version = "3.1.0-1"
 
 source = {
    url = "git://github.com/personnummer/lua",
-   tag = "v3.0.2"
+   tag = "v3.1.0"
 }
 
 description = {
