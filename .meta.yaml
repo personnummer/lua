@@ -1,4 +1,4 @@
-name: "Lua"
-maintainer: "@frozzare"
-spec: 3
-workflow: "lua.yml"
+name: 'Lua'
+maintainer: '@frozzare'
+spec: 3.1
+workflow: 'lua.yml'
