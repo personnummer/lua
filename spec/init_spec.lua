@@ -17,8 +17,8 @@ local function get_json(url)
     return lunajson.decode(body)
 end
 
-local testList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/list.json")
-local interimList = get_json("https://raw.githubusercontent.com/personnummer/meta/master/testdata/interim.json")
+local testList = get_json("https://raw.githubusercontent.com/personnummer/meta/HEAD/testdata/list.json")
+local interimList = get_json("https://raw.githubusercontent.com/personnummer/meta/HEAD/testdata/interim.json")
 
 local availableListFormats = { "integer", "long_format", "short_format", "separated_format", "separated_long" }
 
