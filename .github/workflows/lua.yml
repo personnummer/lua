@@ -18,12 +18,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
-    - uses: leafo/gh-actions-lua@master
+    - uses: actions/checkout@61b9e3751b92087fd0b06925ba6dd6314e06f089 # master
+    - uses: leafo/gh-actions-lua@5da8baa1cf64f003e76f002fc4a57043afd04267 # master
       with:
         luaVersion: ${{ matrix.luaVersion }}
 
-    - uses: leafo/gh-actions-luarocks@master
+    - uses: leafo/gh-actions-luarocks@1957dcb6bbe0e44584217d6c342fa8f60ac406ce # master
 
     - name: Install dependencies
       run: |
